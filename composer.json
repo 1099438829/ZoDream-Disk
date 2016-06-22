@@ -1,0 +1,24 @@
+{
+  "name" : "ZoDream Disk",
+  "version" : "1.0",
+  "require" : {
+    "php" : ">=5.4.0",
+    "zodream/zodream" : "dev-master"
+  },
+  "autoload" : {
+    "psr-4" : {
+      "Service\\": "Service/",
+      "Domain\\": "Domain/",
+      "Infrastructure\\": "Infrastructure/"
+    }
+  },
+  "support" : {
+    "email" : "zodream@fixmail.com"
+  },
+  "authors" : [ {
+    "name" : "Jason Zou",
+    "email" : "zodream@fixmail.com",
+    "homepage" : "http://zodream.cn/",
+    "role" : "Developer"
+  } ]
+}
