@@ -123,14 +123,14 @@ class DiskModel extends Model {
 
 
     /**
-     * @var EmpireModel
+     * @var static
      */
     private static $instance;
 
     /**
      * 查询开始
      * @param null|string $table
-     * @return EmpireModel
+     * @return static
      */
     public static function query($table = null) {
         if (!self::$instance instanceof Model) {

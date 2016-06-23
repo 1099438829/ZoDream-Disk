@@ -14,7 +14,7 @@ body {
 }
 
 .menu .list-group-item.active {
-    background: #767676;
+    background-color: rgba(200, 200, 200, .5);
 }
 
 .zd_all,
@@ -99,4 +99,280 @@ body {
 }
 .list-group-item:hover .zd_trash {
     background-position: -23px -22px;
+}
+
+.view-mode .active {
+    border: none;
+    background: green;
+}
+
+.zd_list .checkbox,
+.header .checkbox {
+    cursor: default;
+    display: block;
+    height: 30px;
+    left: 20px;
+    line-height: 30px;
+    position: absolute;
+    z-index: 1;
+    text-align: left;
+    text-indent: 10px;
+    top: 0;
+    width: 32px;
+    margin: 0;
+    zoom: 1;
+    background: url(../img/checkbox.png) 9px 9px no-repeat;
+}
+
+.header .checkbox {
+    left: 35px;
+    top: 5px;
+}
+
+.header {
+    height: 40px;
+    line-height: 40px;
+    font-size: 20px;
+    font-weight: 900;
+    background: #f5f5f5;
+}
+
+.header .row>div:hover {
+    background-color: rgba(100, 255, 100, .5);
+}
+
+.zd_list .checkbox.checked,
+.zd_list .checked .checkbox,
+.header .checkbox.checked {
+    background-position: -31px 9px;
+}
+
+.zd_list>.row {
+    line-height: 30px;
+}
+
+.zd_grid .checkbox {
+    background: url(../img/checkbox.png) 6px -36px no-repeat;
+    position: absolute;
+    top: -18px;
+    left: -8px;
+    height: 30px;
+    width: 30px;
+    display: none;
+}
+
+.zd_grid .checkbox.checked,
+.zd_grid .checked .checkbox {
+    display: block;
+    background-position: -30px -36px;
+}
+
+.zd_list .row>.col-md-3>div {
+    display: none;
+}
+
+.zd_list .row {
+    margin: 0;
+}
+
+.zd_list .row:hover {
+    background-color: rgba(200, 200, 200, .5);
+}
+
+.zd_list .row:hover>.col-md-3>span {
+    display: none;
+}
+.zd_list .row:hover .zd_tool {
+    display: block;
+}
+
+.zd_list .row .zd_tool span {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.zd_list .row .zd_tool span:hover {
+    color: #f00;
+}
+
+.zd_list .row >.col-md-3 button {
+    background: transparent;
+    height: 30px;
+    border: none;
+}
+
+.zd_dir,
+.zd_file {
+ background: url(../img/grid.png) 16px -77px no-repeat;;
+}
+
+.zd_file {
+    background-position: 20px 15px;
+}
+
+.zd_s_dir,
+.zd_s_file {
+    cursor: default;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    background: url(../img/listIcon.png) 0 -30px no-repeat;
+}
+.zd_s_file {
+    background-position: 0 0;
+}
+
+.zd_grid .col-md-2>div:first-child {
+    position: relative;
+    margin: 0 auto;
+    width: 90px;
+    height: 92px;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+.zd_grid .col-md-2:hover>div:first-child,
+.zd_grid .col-md-2.active>div:first-child {
+    border: 2px solid #2e80dc;
+}
+
+.zd_grid .col-md-2:hover .checkbox,
+.zd_grid .col-md-2.active .checkbox {
+    display: block;
+}
+
+.zd_grid .col-md-2 .zd_name {
+    display: block;
+    padding: 5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+}
+
+.loadEffect{
+    width: 100px;
+    height: 100px;
+    display: none;
+    position: relative;
+    margin: 50px auto 0;
+}
+.loadEffect span{
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    position: absolute;
+    -webkit-animation: load 1.04s ease infinite;
+}
+@-webkit-keyframes load{
+    0%{
+        opacity: 1;
+    }
+    100%{
+        opacity: 0.2;
+    }
+}
+.loadEffect span:nth-child(1){
+    left: 0;
+    top: 50%;
+    margin-top:-8px;
+    -webkit-animation-delay:0.13s;
+}
+.loadEffect span:nth-child(2){
+    left: 14px;
+    top: 14px;
+    -webkit-animation-delay:0.26s;
+}
+.loadEffect span:nth-child(3){
+    left: 50%;
+    top: 0;
+    margin-left: -8px;
+    -webkit-animation-delay:0.39s;
+}
+.loadEffect span:nth-child(4){
+    top: 14px;
+    right:14px;
+    -webkit-animation-delay:0.52s;
+}
+.loadEffect span:nth-child(5){
+    right: 0;
+    top: 50%;
+    margin-top:-8px;
+    -webkit-animation-delay:0.65s;
+}
+.loadEffect span:nth-child(6){
+    right: 14px;
+    bottom:14px;
+    -webkit-animation-delay:0.78s;
+}
+.loadEffect span:nth-child(7){
+    bottom: 0;
+    left: 50%;
+    margin-left: -8px;
+    -webkit-animation-delay:0.91s;
+}
+.loadEffect span:nth-child(8){
+    bottom: 14px;
+    left: 14px;
+    -webkit-animation-delay:1.04s;
+}
+
+.zd_upload {
+    width: 600px;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    height: 0;
+    overflow: hidden;
+    display: none;
+    transition: height 2s;
+    -moz-transition: height 2s; /* Firefox 4 */
+    -webkit-transition: height 2s; /* Safari 和 Chrome */
+    -o-transition: height 2s; /* Opera */
+    background: #fff;
+    border-radius: 20px 0 0;
+}
+
+.zd_upload.min,
+.zd_upload.max {
+    display: block;
+}
+.zd_upload.min {
+    height: 50px;
+}
+.zd_upload.max {
+    height: 400px;
+}
+
+.zd_upload .head {
+    border-radius: 20px 0 0;
+    background: green;
+    height: 50px;
+    text-align: right;
+    font-size: 30px;
+    line-height: 50px;
+    color: #fff;
+    padding: 0 10px;
+}
+
+.zd_upload .head span:first-child {
+    float: left;
+    margin-left: 10px;
+}
+
+.zd_upload .head span {
+    cursor: pointer;
+}
+
+.zd_upload .body {
+    padding: 0 16px;
+    overflow: auto;
+    height: 300px;
+}
+
+.zd_upload .body .row:first-child {
+    border-bottom: 1px solid #767676;
 }

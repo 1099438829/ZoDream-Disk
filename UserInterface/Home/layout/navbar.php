@@ -33,8 +33,8 @@ use Zodream\Domain\Routing\Url;
 
         <ul class="nav navbar-nav navbar-right">
             <?php if (Auth::guest()) :?>
-                <li><?=Html::a('登录', ['account.php/auth', 'ReturnUrl' => Url::to()])?></li>
-                <li><?=Html::a('注册', ['account.php/auth/register'])?></li>
+                <li><?=Html::a('登录', ['account', 'ReturnUrl' => Url::to()])?></li>
+                <li><?=Html::a('注册', ['account/register'])?></li>
             <?php else:?>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><?=Auth::user()['name']?><span class="caret"></span></a>
