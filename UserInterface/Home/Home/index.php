@@ -57,7 +57,7 @@ $this->extend(array(
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                        <li><a href="#">上传文件</a></li>
+                        <li><a href="#" class="uploadFile">上传文件</a></li>
                         <li><a href="#">上传文件夹</a></li>
                     </ul>
                 </div>
@@ -214,21 +214,21 @@ $this->extend(array(
                 操作
             </div>
         </div>
-        <div class="row">
+        <div v-for="item in files" class="row">
             <div class="col-md-4">
-                文件(夹)名
+                {{item.name}}
             </div>
             <div class="col-md-2">
-                大小
+                {{item.size | size}}
             </div>
             <div class="col-md-2">
-                上传目录
+                {{item.dir}}
             </div>
             <div class="col-md-2">
-                状态
+                {{item.status}}
             </div>
             <div class="col-md-2">
-                操作
+                <span v-show="!item.status" v-on:click="delete(item)" class="glyphicon glyphicon-trash"></span>
             </div>
         </div>
     </div>

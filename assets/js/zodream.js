@@ -103,10 +103,19 @@ $(document).ready(function () {
         el: "#upload",
         data: {
             title: "上传",
+            files: [
+                {name: "aaaa", size: 60000, dir: "/", status: 0} 
+            ],
             mode: 0,
         },
         methods: {
-            
+            delete: function (item) {
+                this.files.$remove(item);
+            },
         }
+    });
+
+    $(".uploadFile").click(function () {
+        upload.mode = 2;
     });
 });
