@@ -222,13 +222,18 @@ $this->extend(array(
                 {{item.size | size}}
             </div>
             <div class="col-md-2">
-                {{item.dir}}
+                {{item.md5}}
             </div>
-            <div class="col-md-2">
-                {{item.status}}
+            <div class="col-md-3 status">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" v-bind:style="{width: item.process + '%'}">
+
+                    </div>
+                </div>
+                <span>{{item.status | status}} {{ item.process }}%</span>
             </div>
-            <div class="col-md-2">
-                <span v-show="!item.status" v-on:click="delete(item)" class="glyphicon glyphicon-trash"></span>
+            <div class="col-md-1">
+                <span v-show="item.status > 0" v-on:click="delete(item)" class="glyphicon glyphicon-trash"></span>
             </div>
         </div>
     </div>

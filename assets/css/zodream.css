@@ -376,3 +376,32 @@ body {
 .zd_upload .body .row:first-child {
     border-bottom: 1px solid #767676;
 }
+
+.zd_upload .body .row:hover {
+    background-color: rgba(200, 200, 200, .5);
+    color: #f00;
+}
+
+.zd_upload .body .row {
+    height: 20px;
+    overflow: hidden;
+}
+
+.zd_upload .body .row>div{
+    overflow: hidden;
+}
+
+.zd_upload .row .status {
+    padding: 0 2px;
+}
+.zd_upload .row .status .progress {
+margin: 0;
+}
+
+.zd_upload .row .status span {
+    position: absolute;
+    left: 4px;
+    top: 0;
+    color: #737373;
+}
+
