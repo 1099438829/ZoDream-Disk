@@ -35,7 +35,7 @@ class HomeController extends Controller {
             ]);
         }
         $result = DiskModel::query('disk')->delete([
-            'id' => (array)$data,
+            'id' => [(array)$data, 'or'],
             'user_id' => Auth::user()['id']
         ]);
         $this->ajaxReturn([
@@ -47,11 +47,14 @@ class HomeController extends Controller {
     /**
      * 增加文件夹
      */
-    function addAction() {
+    function createAction() {
         $data = Request::post('name,parent_id 0');
+        $data['create_at'] = $data['update_at'] = time();
+        $data['is_dir'] = 1;
         $result = DiskModel::query('disk')->save([
             'name' => 'required|string:4-100',
             'parent_id' => 'required|int',
+            'is_dir' => null,
             'user_id' => null,
             'create_at' => null,
             'update_at' => null

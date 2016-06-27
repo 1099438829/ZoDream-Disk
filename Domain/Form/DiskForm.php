@@ -10,10 +10,10 @@ use Domain\Model\DiskModel;
 use Zodream\Domain\Authentication\Auth;
 use Zodream\Domain\Form;
 use Zodream\Infrastructure\Cookie;
+use Zodream\Infrastructure\Factory;
 use Zodream\Infrastructure\ObjectExpand\Hash;
 use Zodream\Infrastructure\ObjectExpand\StringExpand;
 use Zodream\Infrastructure\Request;
-use Zodream\Infrastructure\Session;
 
 class DiskForm extends Form {
 
@@ -78,7 +78,7 @@ class DiskForm extends Form {
             'id' => 'a.id',
             'name' => 'a.name'
         ));
-        Session::getInstance()->set('user', $user);
+        Factory::session()->set('user', $user);
         return true;
     }
 

@@ -1,5 +1,6 @@
 <?php
 defined('APP_DIR') or exit();
+use Zodream\Domain\Html\VerifyCsrfToken;
 /** @var $this \Zodream\Domain\Response\View */
 $this->extend(array(
     'layout' => array(
@@ -9,6 +10,10 @@ $this->extend(array(
     )
 );
 ?>
+
+<script>
+    var CSRF = "<?=VerifyCsrfToken::get()?>";
+</script>
 
 <div class="container-fluid">
     <div class="row">
@@ -61,17 +66,25 @@ $this->extend(array(
                         <li><a href="#">上传文件夹</a></li>
                     </ul>
                 </div>
-                <button class="btn btn-default col-md-2"><span class="glyphicon glyphicon-plus"></span>新建文件夹</button>
+                <button class="btn btn-default col-md-2" data-toggle="modal" data-target="#createModal"><span class="glyphicon glyphicon-plus"></span>新建文件夹</button>
                 <div class="col-md-offset-6 col-md-2 view-mode">
                     <button v-bind:class="{'active': isList}" v-on:click="setList(true)"><span class="glyphicon glyphicon-th-list"></span></button>
                     <button v-bind:class="{'active': !isList}" v-on:click="setList(false)"><span class="glyphicon glyphicon-th-large"></span></button>
                 </div>
             </div>
-            <ol class="breadcrumb">
-                <li><a href="#">全部文件</a></li>
-                <li><a href="#">Library</a></li>
-                <li class="active">Data</li>
-            </ol>
+            <div class="row zd_crumb">
+                <div class="col-xs-2" v-show="crumb.length > 1">
+                    <a href="#" v-on:click="top">返回上一级</a> |
+                </div>
+                <div class="col-xs-10">
+                    <ol class="breadcrumb">
+                        <li v-for="(index,item) in crumb" v-bind:class="{'active': index == crumb.length - 1}">
+                            <a href="#" v-on:click="level(item)" v-show="index < crumb.length - 1">{{item.name}}</a>
+                            <span v-show="index == crumb.length - 1">{{item.name}}</span>
+                        </li>
+                    </ol>
+                </div>
+            </div>
             <div class="header">
                 <div v-show="isList && checkCount < 1" class="row">
                     <div class="col-md-1">
@@ -106,11 +119,11 @@ $this->extend(array(
                         已选中 {{ checkCount }} 个文件/文件夹
                     </div>
                     <div class="col-md-8">
-                        <button class="btn btn-default">
+                        <button v-on:click="shareAll" class="btn btn-default">
                             <span class="glyphicon glyphicon-share"></span>
                             分享
                         </button>
-                        <button class="btn btn-default">
+                        <button v-on:click="downloadAll" class="btn btn-default">
                             <span class="glyphicon glyphicon-download-alt"></span>
                             下载
                         </button>
@@ -118,15 +131,15 @@ $this->extend(array(
                             <span class="glyphicon glyphicon-trash"></span>
                             删除
                         </button>
-                        <button class="btn btn-default">
+                        <button v-on:click="moveAll" class="btn btn-default">
                             <span class="glyphicon glyphicon-copy"></span>
                             复制到
                         </button>
-                        <button class="btn btn-default">
+                        <button v-on:click="copyAll" class="btn btn-default">
                             <span class="glyphicon glyphicon-move"></span>
                             移动到
                         </button>
-                        <button class="btn btn-default">
+                        <button v-on:click="rename" class="btn btn-default">
                             <span class="glyphicon glyphicon-pencil"></span>
                             重命名
                         </button>
@@ -139,8 +152,8 @@ $this->extend(array(
                         <div class="col-md-1">
                             <span class="checkbox" v-bind:class="{'checked': item.checked}"></span>
                         </div>
-                        <div class="col-md-6">
-                            <span v-bind:class="{'zd_s_dir': item.type == 0, 'zd_s_file': item.type == 1}"></span>
+                        <div v-on:click.stop="enter(item)" class="col-md-6">
+                            <span v-bind:class="{'zd_s_dir': item.is_dir == 1, 'zd_s_file': item.is_dir == 0}"></span>
                             <span>{{item.name}}</span>
                         </div>
                         <div class="col-md-2">
@@ -149,12 +162,12 @@ $this->extend(array(
                         <div class="col-md-3">
                             <span>{{item.update_at | time}}</span>
                             <div class="zd_tool">
-                                <span class="glyphicon glyphicon-share"></span>
-                                <span class="glyphicon glyphicon-download-alt"></span>
-                                <span class="glyphicon glyphicon-move"></span>
-                                <span class="glyphicon glyphicon-copy"></span>
-                                <span class="glyphicon glyphicon-pencil"></span>
-                                <span v-on:click="delete(item)" class="glyphicon glyphicon-trash"></span>
+                                <span v-on:click.stop="share(item)" class="glyphicon glyphicon-share"></span>
+                                <span v-on:click.stop="download(item)" class="glyphicon glyphicon-download-alt"></span>
+                                <span v-on:click.stop="move(item)" class="glyphicon glyphicon-move"></span>
+                                <span v-on:click.stop="copy(item)" class="glyphicon glyphicon-copy"></span>
+                                <span v-on:click.stop="rename(item)" class="glyphicon glyphicon-pencil"></span>
+                                <span v-on:click.stop="delete(item)" class="glyphicon glyphicon-trash"></span>
                             </div>
                         </div>
                         </div>
@@ -163,11 +176,11 @@ $this->extend(array(
                 <div v-show="!isList" class="zd_grid">
                     <div class="row">
                         <div v-for="item in files" v-on:click="check(item)" class="col-md-2">
-                            <div  v-bind:class="{'zd_dir': item.type == 0, 'zd_file': item.type == 1}">
+                            <div  v-bind:class="{'zd_dir': item.is_dir == 1, 'zd_file': item.is_dir == 0}">
                                 <span class="checkbox" v-bind:class="{'checked': item.checked}"></span>
                             </div>
                             <div class="zd_name">
-                                <a href="#">{{item.name}}</a>
+                                <a href="#" v-on:click="enter(item)">{{item.name}}</a>
                             </div>
                         </div>
                     </div>
@@ -238,6 +251,60 @@ $this->extend(array(
         </div>
     </div>
 </div>
+
+    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="createModalLabel">新建文件夹</h4>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control" type="text" placeholder="文件夹名">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="create btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="renameModalLabel">重命名</h4>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control" type="text" placeholder="文件名">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="rename btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="shareModalLabel">分享</h4>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control" type="text" placeholder="文件夹名">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="create btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <?php
 $this->extend(array(

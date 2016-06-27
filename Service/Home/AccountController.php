@@ -6,7 +6,6 @@ use Domain\Model\DiskModel;
 use Zodream\Domain\Response\Redirect;
 use Zodream\Infrastructure\Cookie;
 use Zodream\Infrastructure\Request;
-use Zodream\Infrastructure\Session;
 
 class AccountController extends Controller {
     protected function rules() {
@@ -37,7 +36,7 @@ class AccountController extends Controller {
         DiskModel::query('user')->updateById(Auth::user()['id'], array(
             'token' => null
         ));
-        Session::getInstance()->clear();
+        Factory::session()->clear();
         Cookie::delete('token');
         Redirect::to('account');
     }

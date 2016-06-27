@@ -32,6 +32,8 @@ $(document).ready(function () {
             i = Math.floor(Math.log(value) / Math.log(k));
         return (value / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
     });
+    var dataCache = {};
+
     var vue = new Vue({
         el: "#content",
         data: {
@@ -40,22 +42,37 @@ $(document).ready(function () {
             isAllChecked: false,
             isList: true,
             orderKey: null,
-            order: null
+            order: null,
+            crumb: [
+                {id: 0, name: "全部文件"}
+            ]
         },
         methods: {
             getList: function () {
+                this.checkCount = 0;
+                this.isAllChecked = false;
+                var parent = this.getParent();
+                if (dataCache.hasOwnProperty(parent)) {
+                    this.addData(dataCache[parent]);
+                    return;
+                }
                 $(".loadEffect").show();
-                $.getJSON("/list", function (data) {
-                   if (data.status != "success") {
-                       return;
-                   }
-                    for(var i in data.data) {
-                        var item = data.data[i];
-                        item.checked = false;
-                        vue.files.push(item);
+                $.getJSON("/list?id=" + parent, function (data) {
+                    if (data.status != "success") {
+                        return;
                     }
+                    dataCache[parent] = data.data;
+                    vue.addData(data.data);
                     $(".loadEffect").hide();
                 });
+            },
+            addData: function (data) {
+                this.files.splice(0);
+                for(var i in data) {
+                    var item = data[i];
+                    item.checked = false;
+                    this.files.push(item);
+                }
             },
             setOrder: function (key) {
                 if (key != this.orderKey) {
@@ -81,6 +98,31 @@ $(document).ready(function () {
                     this.files[i].checked = this.isAllChecked;
                 }
             },
+            enter: function (item) {
+              if (item.is_dir == 0) {
+                  this.check(item);
+                  return;
+              }
+                this.crumb.push(item);
+                this.getList();
+            },
+            top: function () {
+               this.crumb.pop();
+                this.getList();
+            },
+            level: function (item) {
+                if (item.id == 0) {
+                    this.crumb.splice(1);
+                } else {
+                    for (var i = 0, length = this.crumb.length; i < length; i--) {
+                        if (item.id == this.crumb[i]) {
+                            this.crumb.splice(i + 1);
+                            break;
+                        }
+                    }
+                }
+                this.getList();
+            },
             check: function (item) {
                 item.checked = !item.checked;
                 if (!item.checked) {
@@ -97,9 +139,29 @@ $(document).ready(function () {
                 this.isAllChecked = true;
             },
             delete: function (item) {
-                this.files.$remove(item);
+                $.post('/delete', {
+                    id: item.id,
+                    csrf: CSRF
+                }, function (data) {
+                    if (data.status != "success") {
+                        return;
+                    }
+                    this.deleteCache(this.getParent());
+                    this.files.$remove(item);
+                }, "json")
+            },
+            deleteCache: function (index) {
+                if (dataCache.hasOwnProperty(index)) {
+                    delete dataCache[index];
+                }
+            },
+            getParent: function () {
+                return this.crumb[this.crumb.length - 1].id;
             },
             deleteAll: function () {
+                if (this.checkCount > 0) {
+                    this.deleteCache(this.getParent());
+                }
                 for (var i = this.files.length - 1; i >= 0; i --) {
                     if (this.files[i].checked) {
                         this.files.splice(i, 1);
@@ -109,6 +171,44 @@ $(document).ready(function () {
                 if (this.isAllChecked) {
                     this.isAllChecked = false;
                 }
+            },
+            share: function (item) {
+
+            },
+            shareAll: function () {
+
+            },
+            download: function (item) {
+                if (item.is_dir == 1) {
+                    alert("暂不支持文件夹下载！");
+                }
+            },
+            downloadAll: function () {
+
+            },
+            move: function (item) {
+
+            },
+            moveAll: function () {
+
+            },
+            copy: function (item) {
+
+            },
+            copyAll: function () {
+
+            },
+            rename: function (item) {
+                if (item === void 0) {
+                    for (var i = this.files.length - 1; i >= 0; i --) {
+                        if (this.files[i].checked) {
+                            item = this.files[i];
+                            break;
+                        }
+                    }
+                }
+
+                
             }
         }
     });
@@ -297,4 +397,26 @@ $(document).ready(function () {
         event.preventDefault();
     }, false);
     dragUpload.addEventListener('drop', multipleEvent, false);
+    
+    $(".create").click(function () {
+        var element = $(this).parent().parent().find('input');
+        var name = element.val();
+        if (!name) {
+            element.addClass("zd_error");
+            return;
+        }
+        $.post('/create', {
+            name: name,
+            parent_id: vue.getParent(),
+            csrf: CSRF
+        }, function (data) {
+            if (data.status != "success") {
+                element.addClass("zd_error");
+                return;
+            }
+            $('#createModal').modal('toggle');
+            data.data.checked = false;
+            vue.files.push(data.data);
+        }, "json")
+    });
 });
