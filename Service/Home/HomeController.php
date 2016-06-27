@@ -35,7 +35,25 @@ class HomeController extends Controller {
             ]);
         }
         $result = DiskModel::query('disk')->delete([
-            'id' => [(array)$data, 'or'],
+            'id' => [(array)$data, 'or', 'and'],
+            'user_id' => Auth::user()['id']
+        ]);
+        $this->ajaxReturn([
+            'status' => 'success',
+            'data' => $result
+        ]);
+    }
+
+    function shareAction() {
+        $data = Request::post('id,');
+        if (empty($data)) {
+            $this->ajaxReturn([
+                'status' => 'failure',
+                'error' => '不能为空！'
+            ]);
+        }
+        $result = DiskModel::query('disk_share')->addValues([
+            'id' => (array)$data,
             'user_id' => Auth::user()['id']
         ]);
         $this->ajaxReturn([
@@ -69,6 +87,26 @@ class HomeController extends Controller {
         $this->ajaxReturn([
             'status' => 'success',
             'data' => $data
+        ]);
+    }
+
+    function renameAction() {
+        $data = Request::post('id,name');
+        $data['update_at'] = time();
+        $result = DiskModel::query('disk')->save([
+            'name' => 'required|string:4-100',
+            'id' => 'required|int',
+            'update_at' => null
+        ], $data);
+        if (empty($result)) {
+            $this->ajaxReturn([
+                'status' => 'failure',
+                'error' => '添加失败！'
+            ]);
+        }
+        $this->ajaxReturn([
+            'status' => 'success',
+            'update_at' => $data['update_at']
         ]);
     }
 

@@ -33,6 +33,7 @@ $(document).ready(function () {
         return (value / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
     });
     var dataCache = {};
+    var indexFile = null;
 
     var vue = new Vue({
         el: "#content",
@@ -114,13 +115,17 @@ $(document).ready(function () {
                 if (item.id == 0) {
                     this.crumb.splice(1);
                 } else {
-                    for (var i = 0, length = this.crumb.length; i < length; i--) {
-                        if (item.id == this.crumb[i]) {
+                    for (var i = 1, length = this.crumb.length; i < length; i ++) {
+                        if (item.id == this.crumb[i].id) {
                             this.crumb.splice(i + 1);
                             break;
                         }
                     }
                 }
+                this.getList();
+            },
+            refresh: function () {
+                this.deleteCache();
                 this.getList();
             },
             check: function (item) {
@@ -146,24 +151,51 @@ $(document).ready(function () {
                     if (data.status != "success") {
                         return;
                     }
-                    this.deleteCache(this.getParent());
+                    this.deleteCache(item);
                     this.files.$remove(item);
                 }, "json")
             },
-            deleteCache: function (index) {
-                if (dataCache.hasOwnProperty(index)) {
+            deleteCache: function (index, id) {
+                if (index === void 0) {
+                    index = this.getParent();
+                }
+                if (!dataCache.hasOwnProperty(index)) {
+                    return;
+                }
+                if (id === void 0) {
                     delete dataCache[index];
+                    return;
+                }
+                for (var i = dataCache[index].length - 1; i > 0; i -- ) {
+                    var item = dataCache[index][i];
+                    if (id instanceof Array) {
+                        for (var j = id.length - 1; j > 0; j -- ) {
+                            if (item.id == id[j]) {
+                                dataCache[index].splice(i, 1);
+                                id.splice(j, i);
+                            }
+                        }
+                    } else if (typeof id  == "object") {
+                        if (id.id == item.id) {
+                            dataCache[index].splice(i, 1);
+                            return;
+                        }
+                    }
+                    else if (item.id == id) {
+                        dataCache[index].splice(i, 1);
+                        return;
+                    }
+
                 }
             },
             getParent: function () {
                 return this.crumb[this.crumb.length - 1].id;
             },
             deleteAll: function () {
-                if (this.checkCount > 0) {
-                    this.deleteCache(this.getParent());
-                }
+                var ids = [];
                 for (var i = this.files.length - 1; i >= 0; i --) {
                     if (this.files[i].checked) {
+                        ids.push(this.files[i].id);
                         this.files.splice(i, 1);
                     }
                 }
@@ -171,12 +203,43 @@ $(document).ready(function () {
                 if (this.isAllChecked) {
                     this.isAllChecked = false;
                 }
+                $.post('/delete', {
+                    id: ids,
+                    csrf: CSRF
+                }, function (data) {
+                    if (data.status != "success") {
+                        return;
+                    }
+                    this.deleteCache(this.getParent(), ids);
+                }, "json")
             },
             share: function (item) {
-
+                $.post('/share', {
+                    id: item.id,
+                    csrf: CSRF
+                }, function (data) {
+                    if (data.status != "success") {
+                        return;
+                    }
+                    
+                }, "json")
             },
             shareAll: function () {
+                var ids = [];
+                for (var i = this.files.length - 1; i >= 0; i --) {
+                    if (this.files[i].checked) {
+                        ids.push(this.files[i].id);
+                    }
+                }
+                $.post('/share', {
+                    id: ids,
+                    csrf: CSRF
+                }, function (data) {
+                    if (data.status != "success") {
+                        return;
+                    }
 
+                }, "json")
             },
             download: function (item) {
                 if (item.is_dir == 1) {
@@ -207,8 +270,10 @@ $(document).ready(function () {
                         }
                     }
                 }
+                $("#renameModal input").val(item.name);
+                $("#renameModal").modal("show");
+                indexFile = item;
 
-                
             }
         }
     });
@@ -414,9 +479,45 @@ $(document).ready(function () {
                 element.addClass("zd_error");
                 return;
             }
-            $('#createModal').modal('toggle');
+            $('#createModal').modal('hide');
+            element.val("");
             data.data.checked = false;
             vue.files.push(data.data);
-        }, "json")
+            dataCache[vue.getParent()].push(data.data);
+        }, "json");
+    });
+    $(".rename").click(function () {
+        var element = $(this).parent().parent().find('input');
+        var name = element.val();
+        if (!name) {
+            element.addClass("zd_error");
+            return;
+        }
+        $.post('/rename', {
+            name: name,
+            id: indexFile.id,
+            csrf: CSRF
+        }, function (data) {
+            if (data.status != "success") {
+                element.addClass("zd_error");
+                return;
+            }
+            $('#renameModal').modal('hide');
+            element.val("");
+            $(vue.files).each(function (index, item) {
+                if (item.id == indexFile.id) {
+                    item.name = name;
+                    item.update_at = data.update_at;
+                }
+                vue.files.$set(index, item);
+            });
+            $(dataCache[vue.getParent()]).each(function (index, item) {
+                if (item.id == indexFile.id) {
+                    item.name = name;
+                    item.update_at = data.update_at;
+                }
+            });
+            indexFile = null;
+        }, "json");
     });
 });

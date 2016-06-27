@@ -68,6 +68,7 @@ $this->extend(array(
                 </div>
                 <button class="btn btn-default col-md-2" data-toggle="modal" data-target="#createModal"><span class="glyphicon glyphicon-plus"></span>新建文件夹</button>
                 <div class="col-md-offset-6 col-md-2 view-mode">
+                    <button v-bind:class="{'active': !isList}" v-on:click="refresh"><span class="glyphicon glyphicon-refresh"></span></button>
                     <button v-bind:class="{'active': isList}" v-on:click="setList(true)"><span class="glyphicon glyphicon-th-list"></span></button>
                     <button v-bind:class="{'active': !isList}" v-on:click="setList(false)"><span class="glyphicon glyphicon-th-large"></span></button>
                 </div>
