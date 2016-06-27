@@ -181,7 +181,7 @@ $this->extend(array(
                                 <span class="checkbox" v-bind:class="{'checked': item.checked}"></span>
                             </div>
                             <div class="zd_name">
-                                <a href="#" v-on:click="enter(item)">{{item.name}}</a>
+                                <a href="#" v-on:click.stop="enter(item)">{{item.name}}</a>
                             </div>
                         </div>
                     </div>
