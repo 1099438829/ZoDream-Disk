@@ -228,7 +228,7 @@ $this->extend(array(
                 操作
             </div>
         </div>
-        <div v-for="item in files" class="row">
+        <div v-for="(index,item) in files" class="row">
             <div class="col-md-4">
                 {{item.name}}
             </div>
@@ -236,7 +236,7 @@ $this->extend(array(
                 {{item.size | size}}
             </div>
             <div class="col-md-2">
-                {{item.md5}}
+                {{item.parent_name}}
             </div>
             <div class="col-md-3 status">
                 <div class="progress">
@@ -244,10 +244,12 @@ $this->extend(array(
 
                     </div>
                 </div>
-                <span>{{item.status | status}} {{ item.process }}%</span>
+                <div class="zd_tag">
+                    <span>{{item.status | status}}</span> <span v-show="item.status == 0 || item.status == 2">{{ item.process }}%</span>
+                </div>
             </div>
             <div class="col-md-1">
-                <span v-show="item.status > 0" v-on:click="delete(item)" class="glyphicon glyphicon-trash"></span>
+                <span v-on:click.stop="delete(index)" class="glyphicon glyphicon-trash"></span>
             </div>
         </div>
     </div>
@@ -294,14 +296,57 @@ $this->extend(array(
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="shareModalLabel">分享</h4>
+                    <h4 class="modal-title" id="shareModalLabel">分享文件</h4>
                 </div>
                 <div class="modal-body">
-                    <input class="form-control" type="text" placeholder="文件夹名">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#link" aria-controls="link" role="tab" data-toggle="tab">链接分享</a></li>
+                        <li role="presentation"><a href="#friend" aria-controls="friend" role="tab" data-toggle="tab">分享给好友</a></li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="link">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary">创建公开链接</button>
+                                </div>
+                                <div class="col-md-8">
+                                    <p>（文件会出现在你的分享主页，其他人都能查看下载）</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary">创建私密链接</button>
+                                </div>
+                                <div class="col-md-8">
+                                    <p>（只有分享的好友能看到，其他人都看不到）</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="friend">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <select class="form-control" multiple size="12">
+
+                                    </select>
+                                </div>
+                                <div class="col-md-2" style="padding-top: 90px;">
+                                    <button class="btn btn-primary">&gt;&gt;&gt;</button>
+                                    <button class="btn btn-primary">&lt;&lt;&lt;</button>
+                                </div>
+                                <div class="col-md-5">
+                                    <input class="form-control" type="text" placeholder="请输入姓名回车键添加">
+                                    <select class="form-control" multiple size="10">
+
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="create btn btn-primary">确定</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">分享</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

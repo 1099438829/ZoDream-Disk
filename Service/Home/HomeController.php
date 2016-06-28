@@ -3,6 +3,7 @@ namespace Service\Home;
 
 use Domain\Model\DiskModel;
 use Zodream\Domain\Authentication\Auth;
+use Zodream\Domain\Upload\UploadInput;
 use Zodream\Infrastructure\Request;
 
 class HomeController extends Controller {
@@ -125,5 +126,25 @@ class HomeController extends Controller {
                 'data' => null
             ]);
         }
+    }
+
+    function uploadAction() {
+        set_time_limit(0);
+        $upload = new UploadInput();
+        $file = __DIR__.'/'.$upload->getName();
+        $result = $upload->save($file);
+        if (!$result) {
+            $this->ajaxReturn([
+                'status' => 'failure',
+                'error' => $upload->getError()
+            ]);
+        }
+        $this->ajaxReturn([
+            'status' => 'success',
+            'name' => $upload->getName(),
+            'size' => $upload->getSize(),
+            'file' => $file,
+            'type' => $upload->getType()
+        ]);
     }
 }

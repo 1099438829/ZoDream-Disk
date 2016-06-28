@@ -398,11 +398,12 @@ body {
 margin: 0;
 }
 
-.zd_upload .row .status span {
+.zd_upload .row .status .zd_tag {
     position: absolute;
-    left: 4px;
+    left: 10px;
     top: 0;
-    color: #737373;
+    color: #0f0;
+    font-weight: 700;
 }
 
 .zd_error {
