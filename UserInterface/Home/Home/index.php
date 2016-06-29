@@ -154,7 +154,7 @@ $this->extend(array(
                             <span class="checkbox" v-bind:class="{'checked': item.checked}"></span>
                         </div>
                         <div v-on:click.stop="enter(item)" class="col-md-6">
-                            <span v-bind:class="{'zd_s_dir': item.is_dir == 1, 'zd_s_file': item.is_dir == 0}"></span>
+                            <span v-bind:class="{'zd_s_dir': item.is_dir == 1, 'zd_s_file': item.is_dir != 1}"></span>
                             <span>{{item.name}}</span>
                         </div>
                         <div class="col-md-2">
@@ -177,7 +177,7 @@ $this->extend(array(
                 <div v-show="!isList" class="zd_grid">
                     <div class="row">
                         <div v-for="item in files" v-on:click="check(item)" class="col-md-2">
-                            <div  v-bind:class="{'zd_dir': item.is_dir == 1, 'zd_file': item.is_dir == 0}">
+                            <div  v-bind:class="{'zd_dir': item.is_dir == 1, 'zd_file': item.is_dir != 1}">
                                 <span class="checkbox" v-bind:class="{'checked': item.checked}"></span>
                             </div>
                             <div class="zd_name">

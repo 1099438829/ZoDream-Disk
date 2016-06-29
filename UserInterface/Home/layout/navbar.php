@@ -21,8 +21,8 @@ use Zodream\Domain\Routing\Url;
     <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav">
             <li><a href="<?php $this->url('/');?>">主页</a></li>
-            <li<?php $this->cas($this->hasUrl('blog'), ' class="active"');?>><a href="<?php $this->url('blog');?>">网盘</a></li>
-            <li<?php $this->cas($this->hasUrl('laboratory'));?>><a href="<?php $this->url('laboratory');?>">分享</a></li>
+            <li<?php $this->cas($this->hasUrl('share'), ' class="active"');?>><a href="<?php $this->url('share');?>">分享</a></li>
+            <li<?php $this->cas($this->hasUrl('manage'));?>><a href="<?php $this->url('manage');?>">管理</a></li>
         </ul>
         <form class="navbar-form navbar-left" role="search">
             <div class="form-group">

@@ -7,7 +7,7 @@ class DiskModel extends Model {
 	
 	protected $fillAble = array(
 		'name',
-		'extsion',
+		'extension',
 		'icon',
 		'size',
 		'md5',

@@ -70,3 +70,4 @@ typings/
 .vscode/
 
 *.sql
+disk/

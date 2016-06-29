@@ -59,8 +59,20 @@ $(document).ready(function () {
     });
 
     // 主界面数据
-    var dataCache = {};
-    var indexFile = null;
+    var dataCache = {},
+        indexFile = null,
+        downloadFile = function (url) {
+            var download = $(".downloadFrame");
+            console.log(download);
+            if (download.length < 1) {
+                download = document.createElement("iframe");
+                download.className = "downloadFrame";
+                document.body.appendChild(download);
+                download = $(download);
+            }
+            download.attr("src", url);
+            download.hide();
+        };
     var vue = new Vue({
         el: "#content",
         data: {
@@ -126,7 +138,7 @@ $(document).ready(function () {
                 }
             },
             enter: function (item) {
-              if (item.is_dir == 0) {
+              if (item.is_dir != 1) {
                   this.check(item);
                   return;
               }
@@ -177,12 +189,16 @@ $(document).ready(function () {
                     if (data.status != "success") {
                         return;
                     }
-                    this.deleteCache(item);
-                    this.files.$remove(item);
+                    vue.deleteCache(item);
+                    vue.files.$remove(item);
                 }, "json")
             },
             deleteCache: function (index, id) {
-                if (index === void 0) {
+                if (typeof index == "object") {
+                    id = index;
+                    index = -1;
+                }
+                if (index < 0 || index === void 0) {
                     index = this.getParent();
                 }
                 if (!dataCache.hasOwnProperty(index)) {
@@ -219,6 +235,13 @@ $(document).ready(function () {
             },
             getParentItem: function () {
                 return this.crumb[this.crumb.length - 1];
+            },
+            addItem: function (args) {
+                if (typeof args != "object") {
+                    return;
+                }
+                this.files.push(args);
+                dataCache[this.getParent()].push(args);
             },
             deleteAll: function () {
                 var ids = [];
@@ -263,7 +286,9 @@ $(document).ready(function () {
             download: function (item) {
                 if (item.is_dir == 1) {
                     alert("暂不支持文件夹下载！");
+                    return;
                 }
+                downloadFile('/download?id=' + item.id);
             },
             downloadAll: function () {
 
@@ -374,6 +399,25 @@ $(document).ready(function () {
     }
 
     var workers = [],
+        addFile = function (index) {
+            var file = upload.files[index];
+            $.post("/add", {
+                md5: file.md5,
+                name: file.name,
+                parent_id: vue.getParent(),
+                type: file.type,
+                size: file.size,
+                temp: file.temp,
+                csrf: CSRF
+            }, function (data) {
+                if (data.status == "success") {
+                    vue.addItem(data.data);
+                    file.status = 3;
+                    return;
+                }
+                file.status = 7;
+            }, "json");
+        },
         uploadFile = function (index) {
             var file = upload.files[index];
             var xhr = new XMLHttpRequest();
@@ -385,22 +429,49 @@ $(document).ready(function () {
 
                 // 文件上传成功或是失败
                 xhr.onreadystatechange = function(e) {
-                    if (xhr.readyState == 4) {
-                        if (xhr.status == 200) {
-                            file.status = 3;
-                        } else {
-                            file.status = 7;
-                        }
+                    if (xhr.readyState != 4) {
+                        return;
                     }
+                    if (xhr.status != 200) {
+                        file.status = 7;
+                        return;
+                    }
+                    var data = $.parseJSON(xhr.responseText);
+                    if (data.status != 'success') {
+                        file.status = 7;
+                        return;
+                    }
+                    file.status = 3;
+                    file.type = data.type;
+                    addFile(index);
                 };
                 file.status = 2;
                 file.process = 0;
                 // 开始上传
                 xhr.open("POST", "/upload", true);
                 // 不支持中文
-                xhr.setRequestHeader("X-FILENAME", file.name.replace(/[\u4E00-\u9FA5]/g, ''));
+                file.temp = Math.random() + file.name.replace(/[\u4E00-\u9FA5]/g, '');
+                xhr.setRequestHeader("X-FILENAME", file.temp);
                 xhr.send(file.file);
             }
+        },
+        checkMD5 = function (index) {
+            var file = upload.files[index];
+            $.post("/check", {
+                md5: file.md5,
+                name: file.name,
+                parent_id: vue.getParent(),
+                csrf: CSRF
+            }, function (data) {
+                if (data.status == "success") {
+                    file.status = 4;
+                    vue.addItem(data.data);
+                    return;
+                }
+                if (data.code == 2) {
+                    uploadFile(index);
+                }
+            }, "json");
         },
         handle_worker_event = function(index) {
             return function (event) {
@@ -408,7 +479,7 @@ $(document).ready(function () {
                     upload.files[index].status = 1;
                     upload.files[index].process = 0;
                     upload.files[index].md5 = event.data.result;
-                    uploadFile(index);
+                    checkMD5(index);
                 } else {
                     upload.files[index].process = Math.floor(event.data.block.end * 100 / event.data.block.file_size);
                 }
