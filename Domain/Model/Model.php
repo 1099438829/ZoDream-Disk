@@ -15,27 +15,27 @@ abstract class Model extends \Zodream\Domain\Model {
      * 自动完成更新或插入 并添加更新时间、用户id、ip、插入时间
      * @return bool|int
      */
-    public function fill() {
-        $args = func_num_args() > 0 ? func_get_arg(0) : Request::post();
-        if ($args instanceof Request\BaseRequest) {
-            $args = $args->get();
+    public function save() {
+        $rules = $this->rules();
+        if (!array_key_exists('update_at', $rules)) {
+            $this->set('update_at', time());
         }
-        if (!array_key_exists('update_at', $args)) {
-            $args['update_at'] = time();
+        if (!array_key_exists('user_id', $rules) &&
+            !$this->has('user_id') &&
+            !Auth::guest()) {
+            $this->set('user_id', Auth::user()['id']);
         }
-        if (isset($args['id']) && !empty($args['id'])) {
-            return parent::fill($args, intval($args['id']));
+        if (!array_key_exists('ip', $rules)) {
+            $this->set('ip', Request::ip());
         }
-        if (!array_key_exists('user_id', $args) && !Auth::guest()) {
-            $args['user_id'] = Auth::user()['id'];
+        return parent::save();
+    }
+    
+    public function insert() {
+        if (!array_key_exists('create_at', $this->rules())) {
+            $this->set('create_at', time());
         }
-        if (!array_key_exists('ip', $args)) {
-            $args['ip'] = Request::ip();
-        }
-        if (!array_key_exists('create_at', $args)) {
-            $args['create_at'] = $args['update_at'];
-        }
-        return parent::fill($args);
+        return parent::insert();
     }
 
     /**

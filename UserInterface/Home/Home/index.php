@@ -308,7 +308,7 @@ $this->extend(array(
                         <div role="tabpanel" class="tab-pane active" id="link">
                             <div class="row">
                                 <div class="col-md-4">
-                                    <button class="btn btn-primary">创建公开链接</button>
+                                    <button class="btn btn-primary" v-on:click="create">创建公开链接</button>
                                 </div>
                                 <div class="col-md-8">
                                     <p>（文件会出现在你的分享主页，其他人都能查看下载）</p>
@@ -316,10 +316,15 @@ $this->extend(array(
                             </div>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <button class="btn btn-primary">创建私密链接</button>
+                                    <button class="btn btn-primary" v-on:click="create('protected')">创建私密链接</button>
                                 </div>
                                 <div class="col-md-8">
                                     <p>（只有分享的好友能看到，其他人都看不到）</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p class="text-success">{{ message }}</p>
                                 </div>
                             </div>
                         </div>

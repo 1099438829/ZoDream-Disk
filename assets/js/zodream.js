@@ -41,19 +41,40 @@ $(document).ready(function () {
     var share = new Vue({
         el: "#shareModal",
         data: {
-            files: []
+            files: [],
+            mode: "public",
+            message: null
         },
         methods: {
             share: function () {
-                $.post('/share', {
+                if (this.files.length < 1) {
+                    return;
+                }
+                $.post('/home/share', {
                     id: this.files,
+                    mode: this.mode,
                     csrf: CSRF
                 }, function (data) {
                     if (data.status != "success") {
                         return;
                     }
-
+                    switch (data.data.mode) {
+                        case "public":
+                            share.message = data.data.url;
+                            break;
+                        case "protected":
+                            share.message = data.data.url + "        <h4>"
+                                + data.data.password + "</h4>";
+                            break;
+                    }
                 }, "json");
+            },
+            create: function (mode) {
+                if (mode === void 0) {
+                    mode = "public";
+                }
+                this.mode = mode;
+                share();
             }
         }
     });

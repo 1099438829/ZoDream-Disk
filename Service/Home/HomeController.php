@@ -4,8 +4,10 @@ namespace Service\Home;
 use Domain\Model\DiskModel as FactoryModel;
 use Zodream\Domain\Authentication\Auth;
 use Zodream\Domain\Response\Download;
+use Zodream\Domain\Routing\Url;
 use Zodream\Domain\Upload\UploadInput;
 use Zodream\Infrastructure\FileSystem;
+use Zodream\Infrastructure\ObjectExpand\StringExpand;
 use Zodream\Infrastructure\Request;
 use Domain\Model\Home\DiskModel;
 
@@ -45,15 +47,43 @@ class HomeController extends Controller {
     }
 
     function shareAction() {
-        $data = Request::post('id,');
-        if (empty($data)) {
+        $data = Request::post('id,user,mode public');
+        if (empty($data['id'])) {
             $this->ajaxFailure('不能为空！');
         }
-        $result = FactoryModel::query('disk_share')->addValues([
-            'id' => (array)$data,
-            'user_id' => Auth::user()['id']
+        if (!empty($data['user'])) {
+            $args['mode'] = 'private';
+        }
+        $args = ['user_id' => Auth::user()['id'], 'mode' => $data['mode']];
+        if ($data['mode'] == 'protected') {
+            $args['password'] = StringExpand::random(6);
+        }
+        $args['create_at'] = time();
+        $args['id'] = FactoryModel::query('share')->add($args);
+        if (empty($args['id'])) {
+            $this->ajaxFailure('服务器错误！');
+        }
+        
+        FactoryModel::query('share_disk')->addValues([
+            'disk_id' => (array)$data['id'],
+            'share_id' => $args['id']
         ]);
-        $this->ajaxSuccess($result);
+        if ($args['mode'] == 'private') {
+            FactoryModel::query('share_user')->addValues([
+                'user_id' => (array)$data['user'],
+                'share_id' => $args['id']
+            ]);
+        }
+        $args['url'] = Url::to(['share/view', 'id' => $args['id']]);
+        $this->ajaxSuccess($args);
+    }
+    
+    function userAction($id) {
+        $user = FactoryModel::query('user')->findById($id);
+        if (empty($user)) {
+            $this->ajaxFailure('用户名错误！');
+        }
+        $this->ajaxSuccess($user['id']);
     }
 
     /**
@@ -135,7 +165,7 @@ class HomeController extends Controller {
     }
 
     function addAction() {
-        $data = Request::post('name,md5,size,parent_id 0,type,temp');
+        $data = Request::post('name,md5,size,parent_id 0,type:extension,temp');
         $file = $this->config['cache'].$data['temp'];
         if (!is_file($file) || filesize($file) != $data['size']) {
             $this->ajaxFailure('FILE ERROR!');
@@ -147,7 +177,6 @@ class HomeController extends Controller {
         $model = new DiskModel();
         $data['create_at'] = $data['update_at'] = time();
         $id = $model->fill($data);
-        die(var_dump($model->getError()));
         if (empty($id)) {
             return $this->ajaxFailure('添加失败');
         }
@@ -166,5 +195,17 @@ class HomeController extends Controller {
             $this->ajaxFailure('FILE ERROR!');
         }
         Download::make($file, $data['name']);
+    }
+    
+    
+    function folderAction() {
+        $data = FactoryModel::query('disk')->findAll([
+            'is_dir' => 1, 
+            'user_id' => Auth::user()['id']
+        ], 'id,name,parent_id');
+        $this->show([
+            'title' => '文件夹目录',
+            'data' => $data
+        ]);
     }
 }

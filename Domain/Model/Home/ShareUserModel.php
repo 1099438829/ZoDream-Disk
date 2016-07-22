@@ -3,27 +3,27 @@ namespace Domain\Model\Home;
 
 use Domain\Model\Model;
 /**
- * Class RoleUserModel
+ * Class ShareUserModel
+ * @property integer $share_id
  * @property integer $user_id
- * @property integer $role_id
  */
-class RoleUserModel extends Model {
-	public static $table = 'role_user';
+class ShareUserModel extends Model {
+	public static $table = 'share_user';
 
 	protected $primaryKey = array (
 	);
 
 	protected function rules() {
 		return array (
+		  'share_id' => 'required|int',
 		  'user_id' => 'required|int',
-		  'role_id' => 'required|int',
 		);
 	}
 
 	protected function labels() {
 		return array (
+		  'share_id' => 'Share Id',
 		  'user_id' => 'User Id',
-		  'role_id' => 'Role Id',
 		);
 	}
 }
